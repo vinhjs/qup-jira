@@ -18,7 +18,9 @@
   "homepage": "https://github.com/vinhjs/qup-jira#readme",
   "dependencies": {
     "async": "^2.5.0",
+    "exceljs": "^0.6.2",
     "prompt": "^1.0.0",
-    "request": "^2.83.0"
+    "request": "^2.83.0",
+    "tempfile": "^2.0.0"
   }
 }
