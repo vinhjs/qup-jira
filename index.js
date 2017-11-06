@@ -8,7 +8,7 @@ var schema = {
       },
       password: {
         hidden: true,
-        default: 'r0binh00d@235',  
+        default: 'password',  
       },
       action: {
           description: 'What do you want?\
