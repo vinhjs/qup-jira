@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/vinhjs/qup-jira/issues"
   },
-  "homepage": "https://github.com/vinhjs/qup-jira#readme"
+  "homepage": "https://github.com/vinhjs/qup-jira#readme",
+  "dependencies": {
+    "async": "^2.5.0",
+    "prompt": "^1.0.0",
+    "request": "^2.83.0"
+  }
 }
