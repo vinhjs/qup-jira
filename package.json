@@ -1,0 +1,19 @@
+{
+  "name": "qup-jira",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/vinhjs/qup-jira.git"
+  },
+  "author": "vinhjs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vinhjs/qup-jira/issues"
+  },
+  "homepage": "https://github.com/vinhjs/qup-jira#readme"
+}
