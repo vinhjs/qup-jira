@@ -59,7 +59,7 @@ module.exports = function(params){
             function () { return startAt < total; },
             function (callback) {
                request({
-                    url: 'https://issues.qup.vn/rest/api/2/search?startAt='+startAt+'&jql=key in (QTX-19439, QTX-19865, QTX-19511, QTX-19512, QTX-19513, QTX-19509, QTX-19561, QTX-19759, QTX-19758, QTX-17652, QTX-19154, QTX-19183, QTX-19754, QTX-19753, QTX-19562, QTX-19563, QTX-19614, QTX-19615, QTX-19871, QTX-19916, QTX-19370, QTX-19609, QTX-19610, QTX-19704, QTX-19705, QTX-19855, QTX-19663, QTX-19917, QTX-19574, QTX-19918, QTX-18890, QTX-19846, QTX-19774, QTX-17782, QTX-17826, QTX-16252, QTX-16385, QTX-17200, QTX-18806, QTX-17268, QTX-18716, QTX-18544, QTX-17232, QTX-17338, QTX-19749, QTX-19731, QTX-18876, QTX-18914, QTX-18938, QTX-19864, QTX-19838, QTX-19850)',
+                    url: 'https://issues.qup.vn/rest/api/2/search?startAt='+startAt+'&jql=key in (QTX-19439, QTX-19865, QTX-19511, QTX-19512, QTX-19513, QTX-19509, QTX-19561, QTX-19759, QTX-19758, QTX-17652, QTX-19154, QTX-19183, QTX-19754, QTX-19753, QTX-19562, QTX-19563, QTX-19614, QTX-19615, QTX-19871, QTX-19916, QTX-19370, QTX-19609, QTX-19610, QTX-19704, QTX-19705, QTX-19855, QTX-19663, QTX-19917, QTX-19574, QTX-19918, QTX-18890, QTX-19846, QTX-19774, QTX-17782, QTX-17826, QTX-16252, QTX-16385, QTX-19868, QTX-18544, QTX-17232, QTX-17338, QTX-19749, QTX-19731, QTX-18876, QTX-18914, QTX-18938, QTX-19864, QTX-19838, QTX-19850, QTX-19942, QTX-19943)',
                     timeout: 10000,
                     json: true,
                     'auth': {
@@ -103,7 +103,7 @@ module.exports = function(params){
                                         }, function(error, response, result){
                                             console.log('request dev done', keys);
                                             if (result && result.total) {
-                                                async.forEach(result.issues, function(issueDev, cback){  
+                                                async.forEachLimit(result.issues, 1, function(issueDev, cback){  
                                                     if (issueDev.fields.subtasks.length) {
                                                         var row = worksheet.getRow(++count);                                                        
                                                         row.getCell(1).value = { text: issue.key + ' => ' + issueDev.key, hyperlink: 'https://issues.qup.vn/browse/' + issueDev.key };
