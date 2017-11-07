@@ -43,6 +43,7 @@ module.exports = function(params){
             { header: 'Type', width: 17 },
             { header: 'ETA-Duedate', width: 17 },
             { header: 'Assignee', width: 17 },
+            { header: 'Status', width: 10 },
         ]
         worksheet.columns = columns;
         var headerRow = worksheet.getRow(1)
@@ -75,11 +76,15 @@ module.exports = function(params){
                             row.getCell(2).value =issue.fields.summary;
                             row.getCell(3).value =issue.fields.issuetype.name;
                             row.getCell(4).value =issue.fields.timeestimate + '-' + issue.fields.duedate;                            
-                            row.getCell(5).value = 'null';                                                                                
-                            if (issue.fields.issuetype.name == 'Task' && issue.fields.issuelinks.length) {                               
+                            row.getCell(5).value = '';                                                                                
+                            row.getCell(6).value = '';                                                                                
+                            if (issue.fields.issuetype.name == 'Task' && issue.fields.issuelinks.length) { 
+                                var keys = '';                              
                                 async.forEach(issue.fields.issuelinks, function(linkIssue, cback){
                                     if (linkIssue.type.name == 'Relates') {
                                         //get issues detail 
+                                        keys += ',' + (linkIssue.outwardIssue ? linkIssue.outwardIssue.key : linkIssue.inwardIssue.key);
+                                        cback();
                                         request({
                                             url: 'https://issues.qup.vn/rest/api/2/issue/'+ (linkIssue.outwardIssue ? linkIssue.outwardIssue.key : linkIssue.inwardIssue.key),
                                             timeout: 10000,
@@ -95,7 +100,8 @@ module.exports = function(params){
                                                 row.getCell(2).value = result.fields.summary;
                                                 row.getCell(3).value = result.fields.issuetype.name;
                                                 row.getCell(4).value = result.fields.timetracking.originalEstimate + '-' + result.fields.duedate;
-                                                row.getCell(5).value = result.fields.assignee.name;;
+                                                row.getCell(5).value = result.fields.assignee.name;
+                                                row.getCell(6).value = result.fields.status.name;
                                                 row.commit();
                                                 cback();
                                             } else {
@@ -108,10 +114,16 @@ module.exports = function(params){
                                         cback();
                                     }                                    
                                 }, function(){
+                                    if (keys) {
+                                        keys = keys.substr(1);
+                                    } else {
+                                        cback()
+                                    }
                                     cback();
                                 }) 
                             } else {
                                 row.getCell(5).value =issue.fields.assignee.name;
+                                row.getCell(6).value =issue.fields.status.name;
                                 row.commit(); 
                                 cback(); 
                             }                           
