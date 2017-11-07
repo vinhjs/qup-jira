@@ -67,12 +67,13 @@ module.exports = function(params){
                         'pass': params.password
                     }
                 }, function(error, response, result){
+                    console.log('request qup done');
                     if (result && result.total) {                        
                         total = result.total;
                         startAt += 50;
                         async.forEachLimit(result.issues, 1, function(issue, cback){  
                             var row = worksheet.getRow(++count);
-                            row.getCell(1).value =issue.key;
+                            row.getCell(1).value = { text: issue.key, hyperlink: 'https://issues.qup.vn/browse/' + issue.key };
                             row.getCell(2).value =issue.fields.summary;
                             row.getCell(3).value =issue.fields.issuetype.name;
                             row.getCell(4).value =issue.fields.timeestimate + '-' + issue.fields.duedate;                            
@@ -85,8 +86,14 @@ module.exports = function(params){
                                         //get issues detail 
                                         keys += ',' + (linkIssue.outwardIssue ? linkIssue.outwardIssue.key : linkIssue.inwardIssue.key);
                                         cback();
+                                    } else {
+                                        cback();
+                                    }                                    
+                                }, function(){
+                                    if (keys) {
+                                        keys = keys.substr(1);
                                         request({
-                                            url: 'https://issues.qup.vn/rest/api/2/issue/'+ (linkIssue.outwardIssue ? linkIssue.outwardIssue.key : linkIssue.inwardIssue.key),
+                                            url: 'https://issues.qup.vn/rest/api/2/search?jql=key in ('+keys+')',
                                             timeout: 10000,
                                             json: true,
                                             'auth': {
@@ -94,32 +101,79 @@ module.exports = function(params){
                                                 'pass': params.password
                                             }
                                         }, function(error, response, result){
-                                            if (result && result.fields) {
-                                                var row = worksheet.getRow(++count);
-                                                row.getCell(1).value = issue.key + ' => ' + result.key;
-                                                row.getCell(2).value = result.fields.summary;
-                                                row.getCell(3).value = result.fields.issuetype.name;
-                                                row.getCell(4).value = result.fields.timetracking.originalEstimate + '-' + result.fields.duedate;
-                                                row.getCell(5).value = result.fields.assignee.name;
-                                                row.getCell(6).value = result.fields.status.name;
-                                                row.commit();
-                                                cback();
+                                            console.log('request dev done', keys);
+                                            if (result && result.total) {
+                                                async.forEach(result.issues, function(issueDev, cback){  
+                                                    if (issueDev.fields.subtasks.length) {
+                                                        var row = worksheet.getRow(++count);                                                        
+                                                        row.getCell(1).value = { text: issue.key + ' => ' + issueDev.key, hyperlink: 'https://issues.qup.vn/browse/' + issueDev.key };
+                                                        row.getCell(2).value =issueDev.fields.summary;
+                                                        row.getCell(3).value =issueDev.fields.issuetype.name;
+                                                        row.getCell(4).value =issueDev.fields.timeestimate + '-' + issueDev.fields.duedate;                            
+                                                        row.getCell(5).value = issueDev.fields.assignee.name;
+                                                        row.getCell(6).value = issueDev.fields.status.name;
+                                                        row.commit();
+                                                        var subTasksKeys = '';
+                                                        async.forEach(issueDev.fields.subtasks, function(subTask, cback){
+                                                            subTasksKeys += ',' + subTask.key;
+                                                            cback();
+                                                        }, function(){
+                                                            if (subTasksKeys) {
+                                                                subTasksKeys = subTasksKeys.substr(1);
+                                                                request({
+                                                                    url: 'https://issues.qup.vn/rest/api/2/search?jql=key in ('+subTasksKeys+')',
+                                                                    timeout: 10000,
+                                                                    json: true,
+                                                                    'auth': {
+                                                                        'user': params.username,
+                                                                        'pass': params.password
+                                                                    }
+                                                                }, function(error, response, result){
+                                                                    console.log('request dev-subtasks done', subTasksKeys);
+                                                                    if (result && result.total) {
+                                                                        async.forEach(result.issues, function(subTaskDev, cback){  
+                                                                            var row = worksheet.getRow(++count);
+                                                                            row.getCell(1).value = { text: issue.key + ' => ' + issueDev.key + ' => ' + subTaskDev.key, hyperlink: 'https://issues.qup.vn/browse/' + subTaskDev.key };
+                                                                            row.getCell(2).value =subTaskDev.fields.summary;
+                                                                            row.getCell(3).value =subTaskDev.fields.issuetype.name;
+                                                                            row.getCell(4).value =subTaskDev.fields.timeestimate + '-' + subTaskDev.fields.duedate;                            
+                                                                            row.getCell(5).value = subTaskDev.fields.assignee.name;
+                                                                            row.getCell(6).value = subTaskDev.fields.status.name;
+                                                                            row.commit();
+                                                                            cback();
+                                                                        }, function(){
+                                                                            cback();
+                                                                        })
+                                                                    } else {
+                                                                        cback();
+                                                                    }
+                                                                })
+                                                            } else {
+                                                                cback();
+                                                            }
+                                                        })
+                                                    } else {
+                                                        var row = worksheet.getRow(++count);
+                                                        row.getCell(1).value = { text: issue.key + ' => ' + issueDev.key, hyperlink: 'https://issues.qup.vn/browse/' + issueDev.key };
+                                                        row.getCell(2).value =issueDev.fields.summary;
+                                                        row.getCell(3).value =issueDev.fields.issuetype.name;
+                                                        row.getCell(4).value =issueDev.fields.timeestimate + '-' + issueDev.fields.duedate;                            
+                                                        row.getCell(5).value = issueDev.fields.assignee.name;
+                                                        row.getCell(6).value = issueDev.fields.status.name;
+                                                        row.commit();
+                                                        cback();
+                                                    }                                                    
+                                                }, function(){
+                                                    cback();
+                                                })
                                             } else {
                                                 console.log('CANNOT GET ISSUES DETAIL', (linkIssue.outwardIssue ? linkIssue.outwardIssue.key : linkIssue.inwardIssue.key));
                                                 cback();
                                             }
                                         })
-                                        
-                                    } else {
-                                        cback();
-                                    }                                    
-                                }, function(){
-                                    if (keys) {
-                                        keys = keys.substr(1);
                                     } else {
                                         cback()
                                     }
-                                    cback();
                                 }) 
                             } else {
                                 row.getCell(5).value =issue.fields.assignee.name;
