@@ -13,7 +13,8 @@ var schema = {
       action: {
           description: 'What do you want?\
           \n1. get all issues\
-          \n2. get all user with user',
+          \n2. get all user with user\
+          \n3. release',
           required: true,
         default: '1',
       }
@@ -36,6 +37,12 @@ var schema = {
             break;
         case '2':
             require('./libs/getall_user');
+            break; 
+        case '3':
+            require('./libs/release')(result);
+            break; 
+        case '4':
+            require('./libs/check_status')(result);
             break; 
     }
   });

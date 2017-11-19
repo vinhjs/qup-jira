@@ -47,7 +47,7 @@ module.exports = function(params){
             function () { return startAt < total; },
             function (callback) {
                request({
-                    url: 'https://issues.qup.vn/rest/api/2/search?startAt='+startAt+'&jql=key in (QTX-19439, QTX-19865, QTX-19511, QTX-19512, QTX-19513, QTX-19509, QTX-19561, QTX-19759, QTX-19758, QTX-17652, QTX-19154, QTX-19183, QTX-19754, QTX-19753, QTX-19562, QTX-19563, QTX-19614, QTX-19615, QTX-19871, QTX-19916, QTX-19370, QTX-19609, QTX-19610, QTX-19704, QTX-19705, QTX-19855, QTX-19663, QTX-19917, QTX-19574, QTX-19918, QTX-18890, QTX-19846, QTX-19774, QTX-17782, QTX-17826, QTX-16252, QTX-16385, QTX-19868, QTX-18544, QTX-17338, QTX-19749, QTX-19731, QTX-18914, QTX-18938, QTX-19864, QTX-19838, QTX-19850, QTX-19942, QTX-19943)',
+                    url: 'https://issues.qup.vn/rest/api/2/search?startAt='+startAt+'&jql=key in (QTX-19865, QTX-19511, QTX-19512, QTX-19513, QTX-19509, QTX-19561, QTX-19759, QTX-19758, QTX-17652, QTX-19154, QTX-19183, QTX-19754, QTX-19753, QTX-19562, QTX-19563, QTX-19614, QTX-19615, QTX-19871, QTX-19916, QTX-19370, QTX-19609, QTX-19610, QTX-19704, QTX-19705, QTX-19855, QTX-19663, QTX-19917, QTX-19574, QTX-19918, QTX-19846, QTX-19774, QTX-16252, QTX-19868, QTX-17338, QTX-19749, QTX-19731, QTX-18914, QTX-18938, QTX-19838, QTX-19950, QTX-19942, QTX-19943, QTX-18890, QTX-19972, QTX-19951, QTX-19973, QTX-19930, QTX-19935, QTX-19947, QTX-19958, QTX-19980, QTX-19981, QTX-19982, QTX-19983, QTX-19984, QTX-19985, QTX-19986, QTX-19987)',
                     timeout: 10000,
                     json: true,
                     'auth': {
@@ -69,7 +69,7 @@ module.exports = function(params){
                                 status: issue.fields.status.name,
                             }
                             setRow('FULL', rowData);  
-                            setRow(rowData.assignee, rowData);                                                                                                          
+                            setRow(rowData.assignee, rowData);    
                             if (issue.fields.issuetype.name == 'Task' && issue.fields.issuelinks.length) { 
                                 var keys = '';                              
                                 async.forEach(issue.fields.issuelinks, function(linkIssue, cback){
@@ -229,12 +229,20 @@ function setRow(sheetName, data){
     row.getCell(4).value = data.eta;                            
     row.getCell(5).value = data.assignee;                                                                                
     row.getCell(6).value = data.status;
-    if (data.status == 'Resolved') {
+    //
+    if (data.status == 'In Progress') {
         row.fill = {
-        type: 'pattern',
-        pattern:'solid',
-        fgColor:{argb:'00FFFF'}
-    };
+            type: 'pattern',
+            pattern:'solid',
+            fgColor:{argb:'33FF33'}
+        };
+    }
+    if (data.status == 'Resolved' || data.status == 'In Review') {
+        row.fill = {
+            type: 'pattern',
+            pattern:'solid',
+            fgColor:{argb:'00FFFF'}
+        };
     }
     row.commit(); 
 }
